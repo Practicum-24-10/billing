@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+    backend:
+      build: ../../.
+      image: backend-event-image
+      env_file:
+        - ../../.env.test
+      healthcheck:
+        test: ["CMD", "curl", "--fail", "http://localhost:8000/api/openapi"]
+        interval: 15s
+        timeout: 5s
+        retries: 5
+      expose:
+        - 8000
+      depends_on:
+        rabbit:
+          condition: service_healthy
+
+    tests:
+      image: backend-event-image
+      working_dir: /app/backend/tests/functional
+      env_file:
+        - .env.example
+      entrypoint: >
+        sh -c "pip install -r requirements.txt
+        && pytest src_tests"
+      depends_on:
+        - backend
