@@ -6,29 +6,27 @@ autonumber
 
 actor User
 
-User -> Frontend: Нажал кнопку "Оформить подписку"
-
-Frontend -> BillingAPI: Запрос на офрмление подписки
+User -> BillingAPI: Запрос на офрмление подписки
 
 BillingAPI -> BillingAPI: Проверяет токен юзера
 
-BillingAPI -> TransactionsDB: Сохраняем детали платежа, план подписки, срок действия и payment_id
+BillingAPI -> ExternalPaymentService: Запрос на создание платежа
 
-TransactionsDB --> BillingAPI: Ok
+ExternalPaymentService --> BillingAPI: Получаем ссылку на страницу оплаты
 
 BillingAPI --> User: Редирект на страницу оплаты
 
-User -> ExternalPaymentService: Вводит данные карты совершает платеж
+User -> ExternalPaymentService: Вводит данные карты. Запрос на списание средств
 
 par Паралельное выполнение
 
-ExternalPaymentService --> Frontend: Редирект на страницу кинотеатра
+ExternalPaymentService --> User: Редирект на страницу со статусом оплаты
 
-ExternalPaymentService -> BillingAPI: Уведомление о совершенном платеже (вебхук)
+ExternalPaymentService -> BillingAPI: Уведомление о совершенном платеже (вебхук) из metadata получаем user_id, plan
 
 end
 
-BillingAPI -> TransactionsDB: Меняем статус платежа на "Успех"
+BillingAPI -> TransactionsDB: Сохраняем детали платежа, план подписки, срок действия и payment_method.id
 
 TransactionsDB --> BillingAPI: Ok
 
