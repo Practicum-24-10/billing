@@ -1,17 +1,24 @@
 import json
+from enum import Enum
 from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from yookassa import Configuration, Payment
-from yookassa.domain.notification import WebhookNotificationEventType, \
-    WebhookNotificationFactory
 from yookassa.domain.common import SecurityHelper
+from yookassa.domain.notification import (
+    WebhookNotificationEventType,
+    WebhookNotificationFactory,
+)
 
 from backend.src.local.api import errors
 from backend.src.models.jwt import JWTPayload
 from backend.src.services.autorization import get_token_payload
+from backend.src.services.subscriptions import (
+    SubscriptionService,
+    get_subscription_service,
+)
 
 router = APIRouter()
 
@@ -30,14 +37,32 @@ class WebhookModel(BaseModel):
                       example=1611039931, gt=0, lt=9999999999)
 
 
+class PaymentMethodEnum(str, Enum):
+    bank_card = "bank_card"
+
+
 class PayModel(BaseModel):
-    time: int = Field(title="unix timestamp",
-                      description="Время",
-                      example=1611039931, gt=0, lt=9999999999)
+    subscription_id: UUID = Field(title="subscription_id",
+                                  description="subscription_id",
+                                  example="9b3c278c-665f-4055-a824-891f19cb4993"
+                                  )
+    redirect_url: str = Field(title="description",
+                              description="description",
+                              example="https://www.example.com/return_url"
+                              )
+    payment_method: PaymentMethodEnum = Field(title="payment_method",
+                                              description="payment_method",
+                                              example="bank_card"
+                                              )
+    idempotence_key: UUID = Field(title="idempotence_key",
+                                  description="idempotence_key",
+                                  example="f39d7b6d-aef2-40b1-aaf0-cf05e7048011"
+                                  )
 
 
 class PayResponse(BaseModel):
-    status: bool = Field(title="Успех", example=True)
+    payment_link: str = Field(title="Ссылка на оплату",
+                              example="https://www.example.com/return_url")
 
 
 class CancelSubModel(BaseModel):
@@ -58,7 +83,12 @@ class CancelSubResponse(BaseModel):
 )
 async def get_all_subscriptions(
         jwt: None | JWTPayload = Depends(get_token_payload),
+        subscriptions_service: SubscriptionService = Depends(get_subscription_service),
 ):
+    if jwt is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=errors.NO_AUTHORIZED)
     return AllSubscribesResponse(status=True)
 
 
@@ -71,8 +101,23 @@ async def get_all_subscriptions(
 async def pay_subscriptions(
         body: PayModel,
         jwt: None | JWTPayload = Depends(get_token_payload),
+        subscriptions_service: SubscriptionService = Depends(get_subscription_service),
 ):
-    return PayResponse(status=True)
+    if jwt is None:
+        raise HTTPException(
+            status_code=404,
+            detail=errors.NO_AUTHORIZED)
+    active_subscription = await subscriptions_service.check_subscription(jwt)
+    if active_subscription is None:
+        payment_link = subscriptions_service.pay_subscription(jwt,
+                                                                    body.subscription_id,
+                                                                    body.payment_method,
+                                                                    body.redirect_url,
+                                                                    body.idempotence_key)
+        return PayResponse(payment_link=payment_link, status=True)
+    raise HTTPException(
+        status_code=HTTPStatus.BAD_REQUEST,
+        detail=errors.NO_AUTHORIZED)
 
 
 @router.post(
@@ -81,10 +126,18 @@ async def pay_subscriptions(
     response_model=CancelSubResponse,
     summary="Отмена подписки",
 )
-async def pay_subscriptions(
+async def cancel_subscriptions(
         body: CancelSubModel,
         jwt: None | JWTPayload = Depends(get_token_payload),
+        subscriptions_service: SubscriptionService = Depends(get_subscription_service),
 ):
+    if jwt is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=errors.NO_AUTHORIZED)
+    active_subscription = await subscriptions_service.check_subscription(jwt)
+    if active_subscription is not None:
+        response = await subscriptions_service.cancel_subscription(jwt)
     return CancelSubResponse(status=True)
 
 
