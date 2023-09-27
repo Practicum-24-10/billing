@@ -87,8 +87,11 @@ class Payment(Base):
 class UsersSubscriptions(Base):
     __tablename__ = "users_subscriptions"
     id: Mapped[UUID] = mapped_column(_UUID, primary_key=True, default=uuid4())
-    user_id: Mapped[UUID] = mapped_column("User", ForeignKey("user.id"), nullable=False)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"), nullable=False)
     user: Mapped["User"] = relationship("User", back_populates="subscriptions")
+    created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP, nullable=False, default=datetime.now()
+    )
 
     subscription_id: Mapped[UUID] = mapped_column(
         ForeignKey("subscription.id"), nullable=False
@@ -110,8 +113,8 @@ class UsersSubscriptions(Base):
         overlaps="subscription,users_subscriptions",
     )
 
-    start_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
-    expires_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
+    start_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=True)
+    expires_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=True)
     payment: Mapped[list["UsersSubscriptions"]] = relationship(
         "Payment", back_populates="users_subscription"
     )
