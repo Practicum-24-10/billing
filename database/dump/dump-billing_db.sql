@@ -5,7 +5,7 @@
 -- Dumped from database version 13.10 (Debian 13.10-1.pgdg110+1)
 -- Dumped by pg_dump version 14.7 (Homebrew)
 
--- Started on 2023-09-27 21:34:42 MSK
+-- Started on 2023-09-27 23:42:49 MSK
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -92,9 +92,9 @@ CREATE TABLE public.subscription (
     duration integer NOT NULL,
     amount double precision NOT NULL,
     title character varying NOT NULL,
+    currency character varying NOT NULL,
     active boolean NOT NULL,
-    permission character varying NOT NULL,
-    currency character varying NOT NULL
+    permission character varying NOT NULL
 );
 
 
@@ -135,11 +135,12 @@ ALTER TABLE public.users_payment_method OWNER TO app;
 
 CREATE TABLE public.users_subscriptions (
     id uuid NOT NULL,
-    "User" uuid NOT NULL,
+    user_id uuid NOT NULL,
+    created_at timestamp without time zone NOT NULL,
     subscription_id uuid NOT NULL,
     next_subscription_id uuid NOT NULL,
-    start_at timestamp without time zone NOT NULL,
-    expires_at timestamp without time zone NOT NULL
+    start_at timestamp without time zone,
+    expires_at timestamp without time zone
 );
 
 
@@ -152,7 +153,7 @@ ALTER TABLE public.users_subscriptions OWNER TO app;
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-ae3e3c32bcaf
+214dd9906e2f
 \.
 
 
@@ -182,10 +183,10 @@ COPY public.payment_method (id, kassa_payment_method_id) FROM stdin;
 -- Data for Name: subscription; Type: TABLE DATA; Schema: public; Owner: app
 --
 
-COPY public.subscription (id, duration, amount, title, active, permission, currency) FROM stdin;
-94791a79-42a0-46cc-b231-9d8f61569b47	30	300	HD	t	hd	RUB
-b0ec64e6-3c55-4f1f-8d1b-3c9048e53a0b	30	500	FullHD	t	fullhd	RUB
-c4326b05-0e88-4c2a-a053-e8f1dd190b38	30	1000	4K	t	4k	RUB
+COPY public.subscription (id, duration, amount, title, currency, active, permission) FROM stdin;
+94791a79-42a0-46cc-b231-9d8f61569b47	30	300	HD	RUB	t	hd
+b0ec64e6-3c55-4f1f-8d1b-3c9048e53a0b	30	500	FullHD	RUB	t	fullhd
+c4326b05-0e88-4c2a-a053-e8f1dd190b38	30	1000	4K	RUB	t	4k
 \.
 
 
@@ -215,7 +216,7 @@ COPY public.users_payment_method (id, user_id, payment_method_id, "order") FROM 
 -- Data for Name: users_subscriptions; Type: TABLE DATA; Schema: public; Owner: app
 --
 
-COPY public.users_subscriptions (id, "User", subscription_id, next_subscription_id, start_at, expires_at) FROM stdin;
+COPY public.users_subscriptions (id, user_id, created_at, subscription_id, next_subscription_id, start_at, expires_at) FROM stdin;
 \.
 
 
@@ -311,15 +312,6 @@ ALTER TABLE ONLY public.users_payment_method
 
 --
 -- TOC entry 2894 (class 2606 OID 16431)
--- Name: users_subscriptions users_subscriptions_User_fkey; Type: FK CONSTRAINT; Schema: public; Owner: app
---
-
-ALTER TABLE ONLY public.users_subscriptions
-    ADD CONSTRAINT "users_subscriptions_User_fkey" FOREIGN KEY ("User") REFERENCES public."user"(id);
-
-
---
--- TOC entry 2895 (class 2606 OID 16436)
 -- Name: users_subscriptions users_subscriptions_next_subscription_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: app
 --
 
@@ -328,7 +320,7 @@ ALTER TABLE ONLY public.users_subscriptions
 
 
 --
--- TOC entry 2896 (class 2606 OID 16441)
+-- TOC entry 2895 (class 2606 OID 16436)
 -- Name: users_subscriptions users_subscriptions_subscription_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: app
 --
 
@@ -336,7 +328,16 @@ ALTER TABLE ONLY public.users_subscriptions
     ADD CONSTRAINT users_subscriptions_subscription_id_fkey FOREIGN KEY (subscription_id) REFERENCES public.subscription(id);
 
 
--- Completed on 2023-09-27 21:34:43 MSK
+--
+-- TOC entry 2896 (class 2606 OID 16441)
+-- Name: users_subscriptions users_subscriptions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: app
+--
+
+ALTER TABLE ONLY public.users_subscriptions
+    ADD CONSTRAINT users_subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public."user"(id);
+
+
+-- Completed on 2023-09-27 23:42:49 MSK
 
 --
 -- PostgreSQL database dump complete
