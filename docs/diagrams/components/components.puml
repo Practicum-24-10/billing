@@ -1,0 +1,77 @@
+@startuml
+!theme materia
+
+skinparam default {
+    FontName Arial
+    FontSize 16
+}
+
+skinparam component {
+    Style uml2
+    BackgroundColor #f1f1f1
+    FontColor #000
+}
+
+skinparam note {
+    BackgroundColor  #fff8a2
+    FontColor #000
+}
+
+skinparam database {
+    BackgroundColor #f1f1f1
+}
+
+skinparam FrameBorderColor #596bed
+skinparam FrameBackgroundColor #f6fdff
+
+actor User
+
+rectangle ExternalPaymentServices #TECHNOLOGY
+
+frame Auth #TECHNOLOGY {
+    component AuthAPI
+}
+
+frame Notifications #TECHNOLOGY {
+    component NotificationsAPI
+}
+
+
+frame Billing {
+    component BillingAPI
+
+    rectangle AutoPayments {
+        component PaymentsWorker
+        component Scheduler
+        queue PaymentsQueue
+    }
+    
+    database TransactionsDB
+}
+
+
+User -down----> BillingAPI: Оформить/отменить подписку
+
+BillingAPI -> ExternalPaymentServices: Создать платеж, \n получить подтверждение
+
+ExternalPaymentServices <-> User: Оплатить на странице кассы
+
+BillingAPI -down-> TransactionsDB: Сохранить детали платежа
+
+BillingAPI -> Auth: Изменить права юзера
+
+BillingAPI -down-> Notifications: Отправить уведомление об оплате
+
+Notifications -up-> User: Уведомление
+
+Scheduler -down-> TransactionsDB: Найти подписки требующие \n продления и оплаты
+
+Scheduler -down-> PaymentsQueue: Добавить в очередь \n на оплату
+
+PaymentsQueue -up-> PaymentsWorker: Обработать
+
+PaymentsWorker -up-> ExternalPaymentServices: Списать средства
+
+
+
+@enduml

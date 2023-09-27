@@ -1,0 +1,53 @@
+@startuml to be
+
+== Юзер оформляет подписку ==
+
+autonumber
+
+actor User
+
+User -> BillingAPI: Запрос на офрмление подписки
+
+BillingAPI -> BillingAPI: Проверяет токен юзера
+
+BillingAPI -> ExternalPaymentService: Запрос на создание платежа
+
+ExternalPaymentService --> BillingAPI: Получаем ссылку на страницу оплаты
+
+BillingAPI --> User: Редирект на страницу оплаты
+
+User -> ExternalPaymentService: Вводит данные карты. Запрос на списание средств
+
+par Паралельное выполнение
+
+ExternalPaymentService --> User: Редирект на страницу со статусом оплаты
+
+ExternalPaymentService -> BillingAPI: Уведомление о совершенном платеже (вебхук) из metadata получаем user_id, plan
+
+end
+
+BillingAPI -> TransactionsDB: Сохраняем детали платежа, план подписки, срок действия и payment_method.id
+
+TransactionsDB --> BillingAPI: Ok
+
+par Паралельное выполнение
+
+BillingAPI --> ExternalPaymentService: HTTP status 200 Ok
+
+BillingAPI -> Auth: Меняем права пользователя
+
+end
+
+Auth --> BillingAPI: Ok
+
+BillingAPI -> Notifications: Отправить уведомление юзеру о подписке
+
+par
+
+Notifications --> BillingAPI: Ok
+
+Notifications -> User: Уведомление
+
+end
+
+@enduml
