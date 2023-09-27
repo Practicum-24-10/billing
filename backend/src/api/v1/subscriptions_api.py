@@ -44,7 +44,7 @@ class PaymentMethodEnum(str, Enum):
 class PayModel(BaseModel):
     subscription_id: UUID = Field(title="subscription_id",
                                   description="subscription_id",
-                                  example="9b3c278c-665f-4055-a824-891f19cb4993"
+                                  example="94791a79-42a0-46cc-b231-9d8f61569b47"
                                   )
     redirect_url: str = Field(title="description",
                               description="description",
@@ -108,8 +108,8 @@ async def pay_subscriptions(
             status_code=404,
             detail=errors.NO_AUTHORIZED)
     active_subscription = await subscriptions_service.check_subscription(jwt)
-    if active_subscription is None:
-        payment_link = subscriptions_service.pay_subscription(jwt,
+    if not active_subscription:
+        payment_link = await subscriptions_service.pay_subscription(jwt,
                                                                     body.subscription_id,
                                                                     body.payment_method,
                                                                     body.redirect_url,

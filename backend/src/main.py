@@ -16,6 +16,7 @@ from backend.src.db import postgres
 from backend.src.db.storage import PostgresStorage
 from backend.src.kassa import yoo_kassa
 from backend.src.kassa.kassa import YooKassa
+from database.core import pg_config
 
 if config.logging_on:
     sentry_sdk.init(dsn=config.sentry_dsn, integrations=[FastApiIntegration()])
@@ -28,8 +29,14 @@ if config.logging_on:
 async def lifespan(app: FastAPI):
     rsa_key.pk = RsaKey(path=PUBLIC_KEY, algorithms=["RS256"])
     yoo_kassa.yk = YooKassa()
-    postgres.pg = PostgresStorage()
+    postgres.pg = PostgresStorage(pg_config.db_user,
+                                  pg_config.db_password,
+                                  pg_config.db_host,
+                                  pg_config.db_port,
+                                  pg_config.db_name)
+    await postgres.pg.start()
     yield
+    await postgres.pg.end()
 
 
 app = FastAPI(
@@ -40,8 +47,8 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-
-app.include_router(subscription_router, prefix="/api/v1/subscription", tags=["subscription"])
+app.include_router(subscription_router, prefix="/api/v1/subscription",
+                   tags=["subscription"])
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8004, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

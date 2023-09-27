@@ -16,9 +16,10 @@ class SubscriptionService(MixinModel):
     async def pay_subscription(self, jwt: JWTPayload, subscription_id: UUID,
                                payment_method: str, redirect_url: str,idempotence_key: UUID):
         user_id = jwt.user_id
-        subscription = await self._get_subscription(subscription_id)
+        # subscription = await self._get_subscription(subscription_id)
+        subscription = await self._add_subscription_for_user(user_id,subscription_id)
         if subscription is None:
-            return None
+            return None #ошибка нет такой подписки
         payment = PaymentModel(amount_value=subscription.price,
                                amount_currency=subscription.currency,
                                payment_method=payment_method,
@@ -33,7 +34,8 @@ class SubscriptionService(MixinModel):
         pass
 
     async def check_subscription(self, jwt: JWTPayload):
-        return await self._get_active_subscription(jwt.user_id)
+
+        return await self._check_permissions(jwt.permissions)
 
 
 @lru_cache()

@@ -26,7 +26,7 @@ class DetailsPaymentModel(OrjsonMixin):
 
 
 class SubscriptionModel(OrjsonMixin):
-    id: str
+    id: UUID
     price: float
     currency: str
     title: str
