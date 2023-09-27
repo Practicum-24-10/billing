@@ -1,5 +1,5 @@
 [tool.flake8]
-exclude = ['.git', '__pycache__', 'venv', 'storage_research']
+exclude = ['.git', '__pycache__', 'venv', 'storage_research', 'migration']
 max-complexity = 10
 max-line-length = 88
 
@@ -10,7 +10,8 @@ py_version = 310
 
 [tool.pyright]
 exclude = [
-    "**/__pycache__"
+    "**/__pycache__",
+    "migration"
 ]
 include = [
   "backend",

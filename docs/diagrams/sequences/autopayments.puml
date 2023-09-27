@@ -1,0 +1,31 @@
+@startuml to be
+
+== Автоплатеж ==
+
+autonumber
+
+Scheduler -> TransacionsDB: Раз в сутки делает выборку по всем подпискам \n у которых автоплатеж True и дата окончания < 24ч
+
+TransacionsDB --> Scheduler: Списки [payment_method_id, value, currency, plan]
+
+Scheduler -> PaymentsQueue: Добавить в очередь [payment_method_id, value, currency, plan]
+
+PaymentsQueue -> PaymentsWorker: Передать сообщене о платеже
+
+PaymentsWorker -> ExternalPaymentService: Делаем запрос на списание средств
+
+par
+
+ExternalPaymentService --> PaymentsWorker: Ok Успешно списали
+
+ExternalPaymentService -> BillingAPI: Уведомление о совершении платежа
+
+end
+
+BillingAPI -> TransacionsDB: Находим запись по payment_method_id и меняем дату окончания
+
+TransacionsDB --> BillingAPI: Ok
+
+BillingAPI -> ExternalPaymentService: HTTP status 200 Ok
+
+@enduml

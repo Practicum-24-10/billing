@@ -1,0 +1,33 @@
+@startuml to be
+
+== Юзер отказывается от подписки ==
+
+autonumber
+
+actor User
+
+User -> BillingAPI: Запрос на отмену подписки
+
+BillingAPI -> BillingAPI: Проверяет токен юзера
+
+BillingAPI -> TransactionsDB: Меняем поле автоплатеж на False
+
+TransactionsDB --> BillingAPI: Ok
+
+par
+
+BillingAPI --> User: Ok
+
+BillingAPI -> Notifications: Отправить уведомление юзеру об отмене подписки
+
+end
+
+par
+
+Notifications --> BillingAPI: Ok
+
+Notifications -> User: Уведомление: умоляем передумать, угрожаем блокировкой, сливом данных, сглазом и порчей
+
+end
+
+@enduml
