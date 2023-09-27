@@ -56,11 +56,13 @@ class Subscription(Base):
     active: Mapped[bool] = mapped_column(Boolean, nullable=False)
     permission: Mapped[str] = mapped_column(String, nullable=False)
     users_subscriptions: Mapped[list["UsersSubscriptions"]] = relationship(
-        "UsersSubscriptions", back_populates="subscription",
+        "UsersSubscriptions",
+        back_populates="subscription",
         foreign_keys="[UsersSubscriptions.subscription_id]",
     )
     users_next_subscriptions: Mapped[list["UsersSubscriptions"]] = relationship(
-        "UsersSubscriptions", back_populates="next_subscription",
+        "UsersSubscriptions",
+        back_populates="next_subscription",
         foreign_keys="[UsersSubscriptions.next_subscription_id]",
     )
 
@@ -95,12 +97,18 @@ class UsersSubscriptions(Base):
         ForeignKey("subscription.id"), nullable=False
     )
 
-    subscription: Mapped["Subscription"] = relationship("Subscription",
-                                                        back_populates="users_subscriptions",foreign_keys=[subscription_id],overlaps="subscription,users_subscriptions"
-                                                        )
-    next_subscription: Mapped["Subscription"] = relationship("Subscription",
-                                                             back_populates="users_next_subscriptions",foreign_keys=[subscription_id],overlaps="subscription,users_subscriptions"
-                                                             )
+    subscription: Mapped["Subscription"] = relationship(
+        "Subscription",
+        back_populates="users_subscriptions",
+        foreign_keys=[subscription_id],
+        overlaps="subscription,users_subscriptions",
+    )
+    next_subscription: Mapped["Subscription"] = relationship(
+        "Subscription",
+        back_populates="users_next_subscriptions",
+        foreign_keys=[subscription_id],
+        overlaps="subscription,users_subscriptions",
+    )
 
     start_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
