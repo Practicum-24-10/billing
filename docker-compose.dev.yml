@@ -7,7 +7,7 @@ services:
       restart: always
       volumes:
         - pg_billing_volume:/var/lib/postgresql/data/
-#        - ./database/dump:/docker-entrypoint-initdb.d
+        - ./database/dump:/docker-entrypoint-initdb.d
       env_file:
         - .env
       ports:

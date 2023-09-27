@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 
 
 class PostgresConfig(BaseSettings):
-    db_name: str = "bolshoy_db"
+    db_name: str = "billing_db"
     db_user: str = "app"
     db_password: str = "123qwe"
     db_host: str = "localhost"
