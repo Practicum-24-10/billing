@@ -1,10 +1,11 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from sqlalchemy import engine_from_config  # noqa
+from sqlalchemy import pool  # noqa
+
 from database import Base
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -19,6 +20,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -51,11 +53,12 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-
-    from sqlalchemy import create_engine
-    import re
     import os
+    import re
+
     import dotenv
+    from sqlalchemy import create_engine
+
     dotenv.load_dotenv()
 
     url_tokens = {
@@ -63,17 +66,19 @@ def run_migrations_online() -> None:
         "DB_PASSWORD": os.getenv("DB_PASSWORD", ""),
         "DB_HOST": os.getenv("DB_HOST", ""),
         "DB_PORT": os.getenv("DB_PORT", ""),
-        "DB_NAME": os.getenv("DB_NAME", "")
+        "DB_NAME": os.getenv("DB_NAME", ""),
     }
 
     url = config.get_main_option("sqlalchemy.url")
-
+    if not url:
+        url = "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
     url = re.sub(r"\${(.+?)}", lambda m: url_tokens[m.group(1)], url)
     connectable = create_engine(url)
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata,
+            connection=connection,
+            target_metadata=target_metadata,
             compare_type=True,
             compare_server_default=True,
         )
