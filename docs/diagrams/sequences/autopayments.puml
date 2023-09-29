@@ -8,24 +8,54 @@ Scheduler -> TransacionsDB: Раз в сутки делает выборку п�
 
 TransacionsDB --> Scheduler: Списки [payment_method_id, value, currency, plan]
 
-Scheduler -> PaymentsQueue: Добавить в очередь [payment_method_id, value, currency, plan]
+Scheduler -> UserSubscriptionsQueue: Создаем UUID подписки и Добавить в очередь [payment_method_id, value, currency, plan]
 
-PaymentsQueue -> PaymentsWorker: Передать сообщене о платеже
+UserSubscriptionsQueue -> UserSubscriptionsWorker: Передать сообщене о подписке
 
-PaymentsWorker -> ExternalPaymentService: Делаем запрос на списание средств
+UserSubscriptionsWorker -> UserSubscriptionsWorker: Создаем UserSubscriptions с UUID полученным из очереди
 
-par
+UserSubscriptionsWorker -> TransacionsDB: Сохраняем запись в UserSubscriptions
 
-ExternalPaymentService --> PaymentsWorker: Ok Успешно списали
+alt Успешно сохранили
 
-ExternalPaymentService -> BillingAPI: Уведомление о совершении платежа
+TransacionsDB --> UserSubscriptionsWorker: Ok
+
+else Запись уже есть
+
+TransacionsDB --> UserSubscriptionsWorker: Error
 
 end
 
-BillingAPI -> TransacionsDB: Находим запись по payment_method_id и меняем дату окончания
+par
 
-TransacionsDB --> BillingAPI: Ok
+UserSubscriptionsWorker -> PaymentsQueue: Добаваить в очередь UserSubscriptions
 
-BillingAPI -> ExternalPaymentService: HTTP status 200 Ok
+UserSubscriptionsWorker --> UserSubscriptionsQueue: Ok
+
+end
+
+PaymentsQueue -> PaymentsWorker: 
+
+alt Платеж есть
+
+PaymentsWorker -> TransacionsDB: Проверяем есть ли платеж у этой подписки
+
+PaymentsWorker --> PaymentsQueue: Ок
+
+else Платежа нет
+
+PaymentsWorker -> ExternalPaymentService: Делаем запрос на списание средств в \n metadata пишем UUID UserSubscriptions
+
+ExternalPaymentService --> PaymentsWorker: Ok Waiting for capture
+
+PaymentsWorker -> PaymentsWorker: Создаем Payments с \n kassa_payment_id и user_subscriptions_id
+
+PaymentsWorker -> TransacionsDB: Сохраняем Pyaments
+
+TransacionsDB --> PaymentsWorker: Ok
+
+PaymentsWorker --> PaymentsQueue: Ок
+
+end
 
 @enduml
