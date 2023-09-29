@@ -12,7 +12,8 @@ from backend.src.auth import rsa_key
 from backend.src.auth.abc_key import RsaKey
 from backend.src.core.config import PUBLIC_KEY, config
 from backend.src.core.logger import LOGGING
-from backend.src.db import postgres
+from backend.src.db import postgres, redis_db
+from backend.src.db.cache import RedisCache
 from backend.src.db.storage import PostgresStorage
 from backend.src.kassa import yoo_kassa
 from backend.src.kassa.kassa import YooKassa
@@ -27,6 +28,8 @@ if config.logging_on:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    redis_db.redis = RedisCache(host=config.redis_host, port=config.redis_port,
+                                expire=6000)
     rsa_key.pk = RsaKey(path=PUBLIC_KEY, algorithms=["RS256"])
     yoo_kassa.yk = YooKassa()
     postgres.pg = PostgresStorage(pg_config.db_user,
@@ -37,6 +40,7 @@ async def lifespan(app: FastAPI):
     await postgres.pg.start()
     yield
     await postgres.pg.end()
+    await redis_db.redis.close()
 
 
 app = FastAPI(

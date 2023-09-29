@@ -9,6 +9,8 @@ from backend.src.core.logger import LOGGING
 
 class AppSettings(BaseSettings):
     project_name: str = "Some project name"
+    redis_host: str = "localhost"
+    redis_port: int = 6379
     logging_on: bool = True
     sentry_dsn: str = ""
     public_key: str = "jwt-key.pub"

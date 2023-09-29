@@ -6,11 +6,11 @@ from uuid import UUID
 from sqlalchemy import select
 
 from backend.src.models.kassa import SubscriptionModel
-from database import AsyncPostgres, Subscription, UsersSubscriptions, User
+from database import AsyncPostgres, Subscription, UsersSubscriptions, User, Payment
 
 
 class AbstractStorage(ABC):
-    async def save_new_payment(self, user_id: UUID, payment_id: str, status: str):
+    async def save_new_payment(self, users_subscriptions_id: UUID, payment_id: str, status: str):
         pass
 
     async def find_subscription(self,
@@ -37,7 +37,10 @@ class PostgresStorage(AbstractStorage):
     async def end(self):
         await self.driver.close()
 
-    async def save_new_payment(self, user_id: UUID, payment_id: str, status: str):
+    async def save_new_payment(self, users_subscriptions_id: UUID, payment_id: str, status: str):
+        async with self.driver.async_session() as session:
+            session.add(Payment(users_subscriptions_id=users_subscriptions_id,kassa_payment_id=payment_id,payment_status=status))
+            await session.commit()
         return True
 
     async def find_subscription(self,
@@ -63,16 +66,15 @@ class PostgresStorage(AbstractStorage):
                 select(User).filter(User.id == user_id))
             user = result.scalars().first()
             if not user:
-                session.add(User(id=user_id,active=True))
+                session.add(User(id=user_id, active=True))
                 await session.commit()
+
     async def add_subscription_to_user(self, user_id: UUID, subscription: Subscription):
         async with self.driver.async_session() as session:
             user_subscription_id = uuid.uuid4()
             session.add(UsersSubscriptions(id=user_subscription_id, user_id=user_id,
                                            subscription_id=subscription.id,
-                                           next_subscription_id=subscription.id,
-                                           start_at=datetime.now(),
-                                           expires_at=datetime.now()))
+                                           next_subscription_id=subscription.id))
             await session.commit()
             return user_subscription_id
 

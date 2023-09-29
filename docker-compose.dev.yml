@@ -21,6 +21,15 @@ services:
         interval: 10s
         timeout: 5s
         retries: 5
+
+    redis:
+      image: redis:7.0.11-alpine
+      ports:
+        - '6379:6379'
+      volumes:
+        - redis_billing_volume:/data
 volumes:
     pg_billing_volume:
       name: pg_billing_volume
+    redis_billing_volume:
+      name: redis_billing_volume
