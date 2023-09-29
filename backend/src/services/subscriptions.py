@@ -41,8 +41,8 @@ class SubscriptionService(MixinModel):
             return None
         card = self._check_conformation_payment(data["payment_id"])
         if not card:
-            return None
-        return True
+            return False
+        return await self._check_and_add_new_card(card, data["user_id"],data["payment_id"])
 
     async def cancel_subscription(self, jwt: JWTPayload):
         pass

@@ -11,7 +11,7 @@ from backend.src.models.kassa import (
     DetailsPaymentModel,
     PaymentModel,
     PaymentResponseModel,
-    SubscriptionModel,
+    SubscriptionModel, PaymentCard,
 )
 from database import Subscription
 
@@ -57,14 +57,20 @@ class MixinModel(AbstractMixin):
         result = await self.cache.get(orjson.dumps(key))
         if result:
             return orjson.loads(result)
+
     async def _del_data_from_cache(self, key: UUID):
         result = await self.cache.delete(orjson.dumps(key))
         if result:
             return orjson.loads(result)
-    def _check_conformation_payment(self, payment_id: str):
+
+    def _check_conformation_payment(self, payment_id: str) -> PaymentCard | None:
         card = self.kassa.confirm(payment_id)
         if card:
             return card
+
+    async def _check_and_add_new_card(self, card: PaymentCard, user_id: str,
+                                      payment_method_id: str):
+        return await self.storage.add_new_card(card, user_id,payment_method_id)
 
     async def _add_subscription_for_user(self, user_id: UUID, subscription_id: UUID) -> \
             tuple[Subscription, UUID] | tuple[None, None]:

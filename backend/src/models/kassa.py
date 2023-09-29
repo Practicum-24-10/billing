@@ -19,8 +19,8 @@ class PaymentResponseModel(OrjsonMixin):
 
 class PaymentCard(OrjsonMixin):
     card_type: str
-    first6: str | None
-    last4: str
+    first6: int | None
+    last4: int
 
 
 class DetailsPaymentModel(OrjsonMixin):
