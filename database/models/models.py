@@ -41,6 +41,9 @@ class PaymentMethod(Base):
     __tablename__ = "payment_method"
     id: Mapped[UUID] = mapped_column(_UUID, primary_key=True, default=uuid4())
     kassa_payment_method_id: Mapped[str] = mapped_column(String, nullable=False)
+    card_type: Mapped[str] = mapped_column(String, nullable=True)
+    first_numbers: Mapped[int] = mapped_column(Integer, nullable=True)
+    last_numbers: Mapped[int] = mapped_column(Integer, nullable=True)
     user_payment_method: Mapped["UsersPaymentMethods"] = relationship(
         "UsersPaymentMethods", back_populates="payment_method"
     )
