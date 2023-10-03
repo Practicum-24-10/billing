@@ -1,5 +1,5 @@
 import uuid
-from abc import ABC
+from abc import ABC, abstractmethod
 from datetime import datetime
 from http import HTTPStatus
 from uuid import UUID
@@ -30,39 +30,49 @@ from database import (
 
 
 class AbstractStorage(ABC):
+    @abstractmethod
     async def save_new_payment(
         self, users_subscriptions_id: UUID, payment_id: str, status: str
     ):
         pass
 
+    @abstractmethod
     async def delete_user_payment_method(self, user_id: UUID, payment_method_id: UUID):
         pass
 
+    @abstractmethod
     async def check_user_active_subscription(self, user_id: UUID):
         pass
 
+    @abstractmethod
     async def change_user_active(
         self, user_id: UUID, active: bool
     ) -> AutoRenewalModel | None:
         pass
 
+    @abstractmethod
     async def find_subscription(
         self, subscription_id: UUID
     ) -> SubscriptionModel | None:
         pass
 
+    @abstractmethod
     async def change_user_next_subscription(self, user_id: UUID, subscription_id: UUID):
         pass
 
+    @abstractmethod
     async def get_all_subscriptions_permissions(self):
         pass
 
+    @abstractmethod
     async def add_subscription_to_user(self, user_id: UUID, subscription: Subscription):
         pass
 
+    @abstractmethod
     async def add_user(self, user_id: UUID):
         pass
 
+    @abstractmethod
     async def add_new_payment_method(
         self, card: PaymentCard, user_id: str, payment_method_id: str
     ):
@@ -73,12 +83,15 @@ class AbstractStorage(ABC):
     ):
         pass
 
+    @abstractmethod
     async def get_all_subscriptions(self):
         pass
 
+    @abstractmethod
     async def get_user_info(self, user_id: UUID):
         pass
 
+    @abstractmethod
     async def get_user_default_payment(self, user_id: UUID):
         pass
 

@@ -1,5 +1,5 @@
 FROM python:3.10
-
+RUN ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
@@ -7,11 +7,19 @@ WORKDIR /app/backend
 
 ENV PYTHONPATH=/app/
 
-COPY requirements.txt requirements.txt
+COPY backend/requirements.txt requirements.txt
+
+COPY database/requirements.txt requirements_database.txt
 
 RUN  pip install --upgrade pip \
-     && pip install --no-cache-dir -r requirements.txt
+     && pip install --no-cache-dir -r requirements.txt \
+     && pip install --no-cache-dir -r requirements_database.txt
 
-COPY . .
+COPY database /app/database
+COPY backend /app/backend
+COPY migration /app/migration
+COPY alembic.ini /app/alembic.ini
 
-CMD gunicorn src.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+WORKDIR /app
+
+CMD alembic upgrade head && gunicorn backend.src.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
