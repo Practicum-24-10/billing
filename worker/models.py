@@ -19,7 +19,7 @@ class AmountModel(BaseModel):
 
 
 class ConfirmationModel(BaseModel):
-    type: ConfirmationEnum
+    type: ConfirmationEnum = ConfirmationEnum.REDIRECT
     return_url: str
 
 
