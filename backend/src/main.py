@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 
+from backend.src.api.v1.payments_api import router as payment_router
 from backend.src.api.v1.subscriptions_api import router as subscription_router
 from backend.src.auth import rsa_key
 from backend.src.auth.abc_key import RsaKey
@@ -28,15 +29,18 @@ if config.logging_on:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    redis_db.redis = RedisCache(host=config.redis_host, port=config.redis_port,
-                                expire=6000)
+    redis_db.redis = RedisCache(
+        host=config.redis_host, port=config.redis_port, expire=6000
+    )
     rsa_key.pk = RsaKey(path=PUBLIC_KEY, algorithms=["RS256"])
     yoo_kassa.yk = YooKassa()
-    postgres.pg = PostgresStorage(pg_config.db_user,
-                                  pg_config.db_password,
-                                  pg_config.db_host,
-                                  pg_config.db_port,
-                                  pg_config.db_name)
+    postgres.pg = PostgresStorage(
+        pg_config.db_user,
+        pg_config.db_password,
+        pg_config.db_host,
+        pg_config.db_port,
+        pg_config.db_name,
+    )
     await postgres.pg.start()
     yield
     await postgres.pg.end()
@@ -48,11 +52,13 @@ app = FastAPI(
     docs_url="/api/openapi",
     openapi_url="/api/openapi.json",
     default_response_class=ORJSONResponse,
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
-app.include_router(subscription_router, prefix="/api/v1/subscription",
-                   tags=["subscription"])
+app.include_router(
+    subscription_router, prefix="/api/v1/subscription", tags=["subscription"]
+)
+app.include_router(payment_router, prefix="/api/v1/payment", tags=["payment"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

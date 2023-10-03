@@ -9,4 +9,3 @@ def orjson_dumps(v, *, default):
 class OrjsonMixin(BaseModel):
     class Config:
         custom_json = orjson_dumps
-

@@ -1,0 +1,5 @@
+POSTGRES_USER_METHODE_ID_NOT_FOUND = "Платежный метод не найден"
+POSTGRES_USER_METHODE_EXISTS = "Платежный метод уже существует"
+POSTGRES_USER_NOT_FOUND = "Пользователь не найден"
+POSTGRES_SUBSCRIPTION_NOT_FOUND = "Подписка не найдена"
+POSTGRES_USER_SUBSCRIPTION_NOT_FOUND = "Не найдена активная подписка пользователя"
