@@ -5,7 +5,7 @@
 -- Dumped from database version 13.10 (Debian 13.10-1.pgdg110+1)
 -- Dumped by pg_dump version 14.7 (Homebrew)
 
--- Started on 2023-09-27 23:42:49 MSK
+-- Started on 2023-10-02 22:18:07 MSK
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -76,7 +76,10 @@ ALTER TABLE public.payment OWNER TO app;
 
 CREATE TABLE public.payment_method (
     id uuid NOT NULL,
-    kassa_payment_method_id character varying NOT NULL
+    kassa_payment_method_id character varying NOT NULL,
+    card_type character varying,
+    first_numbers integer,
+    last_numbers integer
 );
 
 
@@ -153,7 +156,7 @@ ALTER TABLE public.users_subscriptions OWNER TO app;
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-214dd9906e2f
+900a7a4bd299
 \.
 
 
@@ -164,6 +167,9 @@ COPY public.alembic_version (version_num) FROM stdin;
 --
 
 COPY public.payment (id, created_at, kassa_payment_id, payment_status, users_subscriptions_id) FROM stdin;
+b087df75-afff-43c3-9827-1903ea7d1baa	2023-09-28 00:46:33.89187	2ca6b692-000f-5000-9000-10b66dc7da42	succeeded	aee74e9d-a76a-422c-82cc-b91ff50e11c8
+7226689d-de8d-4efe-af64-7b3bfd2879bb	2023-09-28 00:49:41.292988	2ca6b740-000f-5000-8000-1bc4f85b3e3c	succeeded	d782256f-e86c-4ec9-8baa-c7de11514273
+9bb6157a-e928-4d45-aa35-f2bc0c4c5bc2	2023-09-27 00:46:33.891	2127489d-7045-4a3c-9309-f1ce57c37bf3	canceled	aee74e9d-a76a-422c-82cc-b91ff50e11c8
 \.
 
 
@@ -173,7 +179,9 @@ COPY public.payment (id, created_at, kassa_payment_id, payment_status, users_sub
 -- Data for Name: payment_method; Type: TABLE DATA; Schema: public; Owner: app
 --
 
-COPY public.payment_method (id, kassa_payment_method_id) FROM stdin;
+COPY public.payment_method (id, kassa_payment_method_id, card_type, first_numbers, last_numbers) FROM stdin;
+f02a124b-ecf5-4e38-8c03-d03155cc82e2	2caccbfc-000f-5000-a000-106cc0d44c98	MasterCard	555555	4444
+6f6e6052-b23d-4149-98a1-c59a6a8c96a7	2cacccdf-000f-5000-a000-1b245c9b98fb	MasterCard	555555	4477
 \.
 
 
@@ -197,6 +205,7 @@ c4326b05-0e88-4c2a-a053-e8f1dd190b38	30	1000	4K	RUB	t	4k
 --
 
 COPY public."user" (id, active) FROM stdin;
+92336d84-e39d-4c43-a40b-565821551b21	t
 \.
 
 
@@ -207,6 +216,8 @@ COPY public."user" (id, active) FROM stdin;
 --
 
 COPY public.users_payment_method (id, user_id, payment_method_id, "order") FROM stdin;
+624c9d41-721f-4ff4-a217-06d67f1bc779	92336d84-e39d-4c43-a40b-565821551b21	6f6e6052-b23d-4149-98a1-c59a6a8c96a7	1
+ef8fe5aa-935c-4099-8f76-a45a74357999	92336d84-e39d-4c43-a40b-565821551b21	f02a124b-ecf5-4e38-8c03-d03155cc82e2	2
 \.
 
 
@@ -217,6 +228,8 @@ COPY public.users_payment_method (id, user_id, payment_method_id, "order") FROM 
 --
 
 COPY public.users_subscriptions (id, user_id, created_at, subscription_id, next_subscription_id, start_at, expires_at) FROM stdin;
+aee74e9d-a76a-422c-82cc-b91ff50e11c8	92336d84-e39d-4c43-a40b-565821551b21	2023-08-28 00:46:33.896	94791a79-42a0-46cc-b231-9d8f61569b47	94791a79-42a0-46cc-b231-9d8f61569b47	2023-08-28 00:46:33.896	2023-09-28 00:46:33.896
+d782256f-e86c-4ec9-8baa-c7de11514273	92336d84-e39d-4c43-a40b-565821551b21	2023-09-28 00:49:41.296781	94791a79-42a0-46cc-b231-9d8f61569b47	c4326b05-0e88-4c2a-a053-e8f1dd190b38	2023-09-28 00:49:41.296	2023-10-28 00:49:41.296
 \.
 
 
@@ -337,7 +350,7 @@ ALTER TABLE ONLY public.users_subscriptions
     ADD CONSTRAINT users_subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public."user"(id);
 
 
--- Completed on 2023-09-27 23:42:49 MSK
+-- Completed on 2023-10-02 22:18:08 MSK
 
 --
 -- PostgreSQL database dump complete

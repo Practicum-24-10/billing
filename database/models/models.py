@@ -118,6 +118,6 @@ class UsersSubscriptions(Base):
 
     start_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=True)
     expires_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=True)
-    payment: Mapped[list["UsersSubscriptions"]] = relationship(
+    payment: Mapped[list["Payment"]] = relationship(
         "Payment", back_populates="users_subscription"
     )
