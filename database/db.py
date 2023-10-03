@@ -15,15 +15,11 @@ class AsyncPostgres:
             port,
             name,
         )
-        self.async_session: async_sessionmaker[AsyncSession] | None = None
-        self._engine: AsyncEngine | None = None
-
-    async def start(self):
-        self._engine = create_async_engine(self.url)
-        self.async_session = async_sessionmaker(
-            bind=self._engine, expire_on_commit=False
+        self.engine: AsyncEngine = create_async_engine(self.url)
+        self.async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(
+            bind=self.engine, expire_on_commit=False
         )
 
     async def close(self):
-        if self._engine:
-            await self._engine.dispose()
+        if self.engine:
+            await self.engine.dispose()
