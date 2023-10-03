@@ -35,5 +35,6 @@ class PaymentModel(BaseModel):
     created_at: datetime
     description: str = ''
     metadata: dict
+    recipient: RecipientModel
     refundable: bool = False
     test: bool = True
