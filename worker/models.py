@@ -1,7 +1,8 @@
 from datetime import datetime
+from decimal import Decimal
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class CurrencyEnum(str, Enum):
@@ -14,7 +15,7 @@ class ConfirmationEnum(str, Enum):
 
 
 class AmountModel(BaseModel):
-    value: int = 0
+    value: Decimal = Field(decimal_places=2)
     currency: CurrencyEnum = CurrencyEnum.RUB
 
 
@@ -32,9 +33,9 @@ class PaymentModel(BaseModel):
     amount: AmountModel
     capture: bool = True
     confirmation: ConfirmationModel
-    created_at: datetime
+    created_at: datetime = Field(default_factory=datetime.now)
     description: str = ''
-    metadata: dict
+    metadata: dict = {}
     recipient: RecipientModel
     refundable: bool = False
     test: bool = True
