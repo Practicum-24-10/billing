@@ -5,9 +5,9 @@ from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import HTTPException
-from sqlalchemy import and_, delete, func, select
+from sqlalchemy import and_, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import selectinload
 
 from backend.src.local.api import errors
 from backend.src.models.kassa import PaymentCard, SubscriptionModel
@@ -38,10 +38,17 @@ class AbstractStorage(ABC):
     async def delete_user_payment_method(self, user_id: UUID, payment_method_id: UUID):
         pass
 
-    async def change_user_active(self, user_id: UUID, active: bool) -> AutoRenewalModel | None:
+    async def check_user_active_subscription(self, user_id: UUID):
         pass
 
-    async def find_subscription(self, subscription_id: UUID) -> Subscription | None:
+    async def change_user_active(
+        self, user_id: UUID, active: bool
+    ) -> AutoRenewalModel | None:
+        pass
+
+    async def find_subscription(
+        self, subscription_id: UUID
+    ) -> SubscriptionModel | None:
         pass
 
     async def change_user_next_subscription(self, user_id: UUID, subscription_id: UUID):
@@ -56,7 +63,7 @@ class AbstractStorage(ABC):
     async def add_user(self, user_id: UUID):
         pass
 
-    async def add_new_card(
+    async def add_new_payment_method(
         self, card: PaymentCard, user_id: str, payment_method_id: str
     ):
         pass
@@ -69,8 +76,10 @@ class AbstractStorage(ABC):
     async def get_all_subscriptions(self):
         pass
 
-
     async def get_user_info(self, user_id: UUID):
+        pass
+
+    async def get_user_default_payment(self, user_id: UUID):
         pass
 
 
@@ -78,13 +87,19 @@ class PostgresStorage(AbstractStorage):
     def __init__(self, user, password, host, port, name):
         self.driver = AsyncPostgres(user, password, host, port, name)
 
-    async def start(self):
-        await self.driver.start()
-
-    async def end(self):
+    async def end(self) -> None:
         await self.driver.close()
 
-    async def get_user_info(self, user_id: UUID) -> UserInfoModel:
+    async def check_user_active_subscription(self, user_id: UUID) -> bool:
+        async with self.driver.async_session() as session:
+            user_subscription = await self._get_user_active_subscription(
+                session, user_id
+            )
+            if user_subscription:
+                return True
+            return False
+
+    async def get_user_info(self, user_id: UUID) -> UserInfoModel | None:
         async with self.driver.async_session() as session:
             result = await session.execute(
                 select(User)
@@ -123,6 +138,8 @@ class PostgresStorage(AbstractStorage):
                         UserPaymentMethod(
                             id=payment_method.id,
                             order=payment_method.order,
+                            kassa_payment_method_id=payment_method.
+                            payment_method.kassa_payment_method_id,
                             card_type=payment_method.payment_method.card_type,
                             first_numbers=payment_method.payment_method.first_numbers,
                             last_numbers=payment_method.payment_method.last_numbers,
@@ -135,20 +152,13 @@ class PostgresStorage(AbstractStorage):
                 detail=errors.POSTGRES_USER_NOT_FOUND,
             )
 
-    async def change_user_next_subscription(self, user_id: UUID, subscription_id: UUID):
+    async def change_user_next_subscription(
+        self, user_id: UUID, subscription_id: UUID
+    ) -> bool | None:
         async with self.driver.async_session() as session:
-            result = await session.execute(
-                select(UsersSubscriptions)
-                .join(Payment, Payment.users_subscriptions_id == UsersSubscriptions.id)
-                .filter(Payment.payment_status == "succeeded")
-                .filter(
-                    and_(
-                        UsersSubscriptions.user_id == user_id,
-                        UsersSubscriptions.expires_at > datetime.now(),
-                    )
-                )
+            user_subscription = await self._get_user_active_subscription(
+                session, user_id
             )
-            user_subscription = result.scalars().first()
             if not user_subscription:
                 raise HTTPException(
                     status_code=HTTPStatus.NOT_FOUND,
@@ -160,7 +170,7 @@ class PostgresStorage(AbstractStorage):
 
     async def save_new_payment(
         self, users_subscriptions_id: UUID, payment_id: str, status: str
-    ):
+    ) -> bool:
         async with self.driver.async_session() as session:
             session.add(
                 Payment(
@@ -172,9 +182,30 @@ class PostgresStorage(AbstractStorage):
             await session.commit()
         return True
 
+    async def get_user_default_payment(self, user_id: UUID) -> UserPaymentMethod | None:
+        async with self.driver.async_session() as session:
+            result = await session.execute(
+                select(UsersPaymentMethods)
+                .options(selectinload(UsersPaymentMethods.payment_method))
+                .filter(UsersPaymentMethods.user_id == user_id)
+                .order_by(desc(UsersPaymentMethods.order))
+            )
+            payment_method = result.scalars().first()
+            if payment_method:
+                return UserPaymentMethod(
+                    id=payment_method.id,
+                    order=payment_method.order,
+                    kassa_payment_method_id=payment_method.
+                    payment_method.kassa_payment_method_id,
+                    card_type=payment_method.payment_method.card_type,
+                    first_numbers=payment_method.payment_method.first_numbers,
+                    last_numbers=payment_method.payment_method.last_numbers,
+                )
+            return None
+
     async def change_order_user_payment_method(
         self, user_id: UUID, user_payment_method_id: UUID
-    ):
+    ) -> bool:
         async with self.driver.async_session() as session:
             result = await session.execute(
                 select(UsersPaymentMethods).filter(
@@ -194,7 +225,9 @@ class PostgresStorage(AbstractStorage):
                 return True
             return False
 
-    async def change_user_active(self, user_id: UUID, active: bool) -> AutoRenewalModel | None:
+    async def change_user_active(
+        self, user_id: UUID, active: bool
+    ) -> AutoRenewalModel | None:
         async with self.driver.async_session() as session:
             user = await self._get_user(session, user_id)
             if user:
@@ -204,6 +237,21 @@ class PostgresStorage(AbstractStorage):
             raise HTTPException(
                 status_code=HTTPStatus.NOT_FOUND, detail=errors.NO_AUTHORIZED
             )
+
+    @staticmethod
+    async def _get_user_active_subscription(session: AsyncSession, user_id: UUID):
+        result = await session.execute(
+            select(UsersSubscriptions)
+            .join(Payment, Payment.users_subscriptions_id == UsersSubscriptions.id)
+            .filter(Payment.payment_status == "succeeded")
+            .filter(
+                and_(
+                    UsersSubscriptions.user_id == user_id,
+                    UsersSubscriptions.expires_at > datetime.now(),
+                )
+            )
+        )
+        return result.scalars().first()
 
     @staticmethod
     async def _get_user(session: AsyncSession, user_id: UUID):
@@ -228,7 +276,7 @@ class PostgresStorage(AbstractStorage):
 
     async def delete_user_payment_method(
         self, user_id: UUID, user_payment_method_id: UUID
-    ):
+    ) -> bool:
         async with self.driver.async_session() as session:
             query = (
                 select(UsersPaymentMethods, PaymentMethod)
@@ -256,9 +304,9 @@ class PostgresStorage(AbstractStorage):
             else:
                 return False
 
-    async def add_new_card(
+    async def add_new_payment_method(
         self, card: PaymentCard, user_id: str, payment_method_id: str
-    ):
+    ) -> bool | None:
         async with self.driver.async_session() as session:
             new_order = await self._get_new_max_order_from_user_payment_method(
                 session, user_id
@@ -303,21 +351,25 @@ class PostgresStorage(AbstractStorage):
             await session.commit()
             return True
 
-    async def find_subscription(self, subscription_id: UUID) -> Subscription | None:
+    async def find_subscription(
+        self, subscription_id: UUID
+    ) -> SubscriptionModel | None:
         async with self.driver.async_session() as session:
             result = await session.execute(
-                select(Subscription).filter(Subscription.id == subscription_id)
+                select(Subscription).filter(
+                    Subscription.id == subscription_id,
+                    Subscription.active == True,  # noqa
+                )
             )
             subscription = result.scalars().first()
             if subscription:
-                return subscription
-                # return SubscriptionModel(
-                #     id=subscription.id,
-                #     price=subscription.amount,
-                #     currency=subscription.currency,
-                #     title=subscription.title,
-                #     duration=subscription.duration
-                # )
+                return SubscriptionModel(
+                    id=subscription.id,
+                    price=subscription.amount,
+                    currency=subscription.currency,
+                    title=subscription.title,
+                    duration=subscription.duration,
+                )
             return None
 
     async def add_user(self, user_id: UUID):
@@ -346,7 +398,7 @@ class PostgresStorage(AbstractStorage):
         async with self.driver.async_session() as session:
             result = await session.execute(
                 select(Subscription.permission)
-                .where(Subscription.active == True)
+                .where(Subscription.active == True)  # noqa
                 .group_by(Subscription.permission)
             )
             permissions = result.scalars().all()
@@ -355,7 +407,7 @@ class PostgresStorage(AbstractStorage):
     async def get_all_subscriptions(self) -> list[SubscriptionModel] | None:
         async with self.driver.async_session() as session:
             result = await session.execute(
-                select(Subscription).where(Subscription.active == True)
+                select(Subscription).where(Subscription.active == True)  # noqa
             )
             subscriptions = result.scalars().all()
             if subscriptions:
@@ -371,9 +423,3 @@ class PostgresStorage(AbstractStorage):
                 ]
                 return result
             return None
-
-    # async def start(self):
-    #     await self.driver.start()
-    #
-    # async def close(self):
-    #     await self.driver.close()

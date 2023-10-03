@@ -17,19 +17,11 @@ class SubscriptionsResponse(BaseModel):
     currency: str = Field(title="Валюта", examples=["RUB"])
 
 
-class PayModel(BaseModel):
+class NewSubscriptionModel(BaseModel):
     subscription_id: UUID = Field(
         title="subscription_id",
         description="subscription_id",
         examples=["94791a79-42a0-46cc-b231-9d8f61569b47"],
-    )
-    redirect_url: str = Field(
-        title="description",
-        description="description",
-        examples=["https://www.examples.com/return_url"],
-    )
-    payment_method: PaymentMethodEnum = Field(
-        title="payment_method", description="payment_method", examples=["bank_card"]
     )
     idempotence_key: UUID = Field(
         title="idempotence_key",
@@ -38,17 +30,24 @@ class PayModel(BaseModel):
     )
 
 
+class NewSubscriptionResponse(BaseModel):
+    status: bool = Field(title="Успех", examples=[True])
+
+
 class UserPaymentResponse(BaseModel):
     id: UUID = Field(
         title="ID оплаты за подписку", examples=["f39d7b6d-aef2-40b1-aaf0-cf05e7048011"]
     )
-    created_at: datetime = Field(title="Дата создания платежа", examples=[datetime.now()])
+    created_at: datetime = Field(
+        title="Дата создания платежа", examples=[datetime.now()]
+    )
     payment_status: str = Field(title="Статус платежа", examples=["succeeded"])
 
 
 class UserSubscriptionResponse(BaseModel):
     id: UUID = Field(
-        title="ID подписки пользователя", examples=["f39d7b6d-aef2-40b1-aaf0-cf05e7048011"]
+        title="ID подписки пользователя",
+        examples=["f39d7b6d-aef2-40b1-aaf0-cf05e7048011"],
     )
     start_at: datetime = Field(title="Время начала подписки", examples=[datetime.now()])
     expires_at: datetime = Field(
@@ -75,12 +74,6 @@ class UserInfoResponse(BaseModel):
     active: bool = Field(title="Автопродление", examples=[True])
     subscriptions: list[UserSubscriptionResponse] = Field(title="Подписки")
     payment_methods: list[UserPaymentMethodResponse] = Field(title="Методы оплаты")
-
-
-class PayResponse(BaseModel):
-    payment_link: str = Field(
-        title="Ссылка на оплату", examples=["https://www.examples.com/return_url"]
-    )
 
 
 class CancelSubModel(BaseModel):

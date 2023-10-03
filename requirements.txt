@@ -1,4 +1,4 @@
-pyright==1.1.327
+pyright==1.1.329
 flake8==6.1.0
 Flake8-pyproject==1.2.3
 black==23.9.1

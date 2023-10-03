@@ -33,6 +33,7 @@ class UserPaymentMethod(OrjsonMixin):
     id: UUID
     order: int
     card_type: str
+    kassa_payment_method_id: str
     first_numbers: int
     last_numbers: int
 

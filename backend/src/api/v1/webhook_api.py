@@ -48,7 +48,8 @@
 #         # Создание объекта класса уведомлений в зависимости от события
 #         notification_object = WebhookNotificationFactory().create(body)
 #         response_object = notification_object.object
-#         if notification_object.event == WebhookNotificationEventType.PAYMENT_SUCCEEDED:
+#         if notification_object.event == \
+#                 WebhookNotificationEventType.PAYMENT_SUCCEEDED:
 #             some_data = {
 #                 "paymentId": response_object.id,
 #                 "paymentStatus": response_object.status,
@@ -56,8 +57,8 @@
 #             # Специфичная логика
 #             # ...
 #         elif (
-#             notification_object.event
-#             == WebhookNotificationEventType.PAYMENT_WAITING_FOR_CAPTURE
+#             notification_object.event ==
+#             WebhookNotificationEventType.PAYMENT_WAITING_FOR_CAPTURE
 #         ):
 #             some_data = {
 #                 "paymentId": response_object.id,
@@ -65,14 +66,16 @@
 #             }
 #             # Специфичная логика
 #             # ...
-#         elif notification_object.event == WebhookNotificationEventType.PAYMENT_CANCELED:
+#         elif notification_object.event == \
+#                 WebhookNotificationEventType.PAYMENT_CANCELED:
 #             some_data = {
 #                 "paymentId": response_object.id,
 #                 "paymentStatus": response_object.status,
 #             }
 #             # Специфичная логика
 #             # ...
-#         elif notification_object.event == WebhookNotificationEventType.REFUND_SUCCEEDED:
+#         elif notification_object.event == \
+#                 WebhookNotificationEventType.REFUND_SUCCEEDED:
 #             some_data = {
 #                 "refundId": response_object.id,
 #                 "refundStatus": response_object.status,
@@ -80,14 +83,16 @@
 #             }
 #             # Специфичная логика
 #             # ...
-#         elif notification_object.event == WebhookNotificationEventType.DEAL_CLOSED:
+#         elif notification_object.event == \
+#                 WebhookNotificationEventType.DEAL_CLOSED:
 #             some_data = {
 #                 "dealId": response_object.id,
 #                 "dealStatus": response_object.status,
 #             }
 #             # Специфичная логика
 #             # ...
-#         elif notification_object.event == WebhookNotificationEventType.PAYOUT_SUCCEEDED:
+#         elif notification_object.event == \
+#                 WebhookNotificationEventType.PAYOUT_SUCCEEDED:
 #             some_data = {
 #                 "payoutId": response_object.id,
 #                 "payoutStatus": response_object.status,
@@ -95,7 +100,8 @@
 #             }
 #             # Специфичная логика
 #             # ...
-#         elif notification_object.event == WebhookNotificationEventType.PAYOUT_CANCELED:
+#         elif notification_object.event == \
+#                 WebhookNotificationEventType.PAYOUT_CANCELED:
 #             some_data = {
 #                 "payoutId": response_object.id,
 #                 "payoutStatus": response_object.status,

@@ -41,7 +41,6 @@ async def lifespan(app: FastAPI):
         pg_config.db_port,
         pg_config.db_name,
     )
-    await postgres.pg.start()
     yield
     await postgres.pg.end()
     await redis_db.redis.close()

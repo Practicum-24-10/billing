@@ -1,4 +1,3 @@
-import uuid
 from abc import ABC
 from uuid import UUID
 
@@ -11,10 +10,8 @@ from backend.src.models.kassa import (
     DetailsPaymentModel,
     PaymentCard,
     PaymentModel,
-    PaymentResponseModel,
     SubscriptionModel,
 )
-from database import Subscription
 
 
 class AbstractMixin(ABC):
@@ -38,6 +35,7 @@ class MixinModel(AbstractMixin):
         )
         if payment_response:
             return payment_response.payment_page, payment_response.id
+        return None, None
 
     async def _get_all_subscriptions_from_storage(self):
         return await self.storage.get_all_subscriptions()
@@ -51,6 +49,8 @@ class MixinModel(AbstractMixin):
         payment_response = self.kassa.get_new_payment(
             payment_params=payment, details=details
         )
+        if not payment_response:
+            return None
         response = await self.storage.save_new_payment(
             users_subscriptions_id=users_subscriptions_id,
             payment_id=payment_response.id,
@@ -92,9 +92,13 @@ class MixinModel(AbstractMixin):
     async def _check_and_add_new_card(
         self, card: PaymentCard, user_id: str, payment_method_id: str
     ):
-        return await self.storage.add_new_card(card, user_id, payment_method_id)
+        return await self.storage.add_new_payment_method(
+            card, user_id, payment_method_id
+        )
 
-    async def _find_subscription(self, subscription_id: UUID):
+    async def _find_subscription(
+        self, subscription_id: UUID
+    ) -> SubscriptionModel | None:
         return await self.storage.find_subscription(subscription_id)
 
     async def _change_user_next_subscription(
@@ -105,24 +109,8 @@ class MixinModel(AbstractMixin):
         )
 
     async def _get_user_info(self, user_id: UUID):
-        # user_subscriptions = await self.storage.get_user_subscriptions(user_id)
         user_info = await self.storage.get_user_info(user_id)
         return user_info
-
-    async def _add_subscription_for_user(
-        self, user_id: UUID, subscription_id: UUID
-    ) -> tuple[Subscription, UUID] | tuple[None, None]:
-        await self.storage.add_user(user_id)
-        subscription = await self.storage.find_subscription(subscription_id)
-        if not subscription:
-            return None, None
-
-        user_subscription_id = await self.storage.add_subscription_to_user(
-            user_id, subscription
-        )
-        if not user_subscription_id:
-            return None, None
-        return subscription, user_subscription_id
 
     async def _get_subscription(
         self, subscription_id: UUID
@@ -132,11 +120,11 @@ class MixinModel(AbstractMixin):
     def _safe_to_storage(self):
         pass
 
-    async def _check_permissions(self, permissions: list[str]):
-        subscriptions_permissions = (
-            await self.storage.get_all_subscriptions_permissions()
-        )
-        result = set(permissions) & set(subscriptions_permissions)
-        if result:
-            return True
-        return False
+    async def _check_active_user_subscription(self, user_id: UUID):
+        return await self.storage.check_user_active_subscription(user_id)
+
+    async def _add_new_subscription_to_queue(
+        self, user_id: UUID, subscription_id: UUID
+    ):
+        payment_method = await self.storage.get_user_default_payment(user_id)  # noqa
+        return True

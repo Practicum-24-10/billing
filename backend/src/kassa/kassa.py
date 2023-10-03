@@ -1,6 +1,5 @@
 from abc import ABC
 from http import HTTPStatus
-from uuid import UUID
 
 from fastapi import HTTPException
 from yookassa import Configuration, Payment
@@ -17,7 +16,7 @@ from backend.src.models.kassa import (
 
 class AbstractKassa(ABC):
     def get_new_payment(
-            self, payment_params: PaymentModel, details: DetailsPaymentModel
+        self, payment_params: PaymentModel, details: DetailsPaymentModel
     ) -> PaymentResponseModel | None:
         pass
 
@@ -66,7 +65,7 @@ class YooKassa(AbstractKassa):
             raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
 
     def get_new_payment(
-            self, payment_params: PaymentModel, details: DetailsPaymentModel
+        self, payment_params: PaymentModel, details: DetailsPaymentModel
     ) -> PaymentResponseModel | None:
         try:
             payment = self.payment.create(
