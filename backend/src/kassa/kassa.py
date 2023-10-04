@@ -16,7 +16,7 @@ from backend.src.models.kassa import (
 
 class AbstractKassa(ABC):
     def get_new_payment(
-        self, payment_params: PaymentModel, details: DetailsPaymentModel
+            self, payment_params: PaymentModel, details: DetailsPaymentModel
     ) -> PaymentResponseModel | None:
         pass
 
@@ -65,7 +65,7 @@ class YooKassa(AbstractKassa):
             raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
 
     def get_new_payment(
-        self, payment_params: PaymentModel, details: DetailsPaymentModel
+            self, payment_params: PaymentModel, details: DetailsPaymentModel
     ) -> PaymentResponseModel | None:
         try:
             payment = self.payment.create(
@@ -83,9 +83,8 @@ class YooKassa(AbstractKassa):
                     "description": details.description,
                     "save_payment_method": payment_params.save_payment,
                     "metadata": details.metadata,
-                }
-            )
-            # }, str(details.idempotence_key))
+
+                }, str(details.idempotence_key))
             if payment:
                 return PaymentResponseModel(
                     id=payment.id,  # type: ignore

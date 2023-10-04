@@ -23,11 +23,6 @@ class NewSubscriptionModel(BaseModel):
         description="subscription_id",
         examples=["94791a79-42a0-46cc-b231-9d8f61569b47"],
     )
-    idempotence_key: UUID = Field(
-        title="idempotence_key",
-        description="idempotence_key",
-        examples=["f39d7b6d-aef2-40b1-aaf0-cf05e7048011"],
-    )
 
 
 class NewSubscriptionResponse(BaseModel):
