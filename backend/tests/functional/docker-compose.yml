@@ -7,7 +7,7 @@ services:
       volumes:
         - pg_test_billing_volume:/var/lib/postgresql/data/
       env_file:
-        - ../../../.env
+        - ../../../.env.test
       environment:
         - POSTGRES_USER=${DB_USER}
         - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -49,7 +49,7 @@ services:
       image: backend-billing-image
       working_dir: /app/backend/tests/functional
       env_file:
-        - .env.example
+        - .env.test
       entrypoint: >
         sh -c "pip install -r requirements.txt
         && pytest src_tests"
