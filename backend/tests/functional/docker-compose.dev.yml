@@ -6,6 +6,8 @@ services:
       restart: always
       volumes:
         - pg_test_billing_volume:/var/lib/postgresql/data/
+      ports:
+        - '5432:5432'
       env_file:
         - ../../../.env
       environment:
@@ -31,6 +33,8 @@ services:
         retries: 5
       expose:
         - 8000
+      ports:
+        - '8000:8000'
       depends_on:
         redis:
           condition: service_healthy
@@ -38,6 +42,8 @@ services:
           condition: service_healthy
     redis:
       image: redis:7.0.11-alpine
+      ports:
+        - '6379:6379'
       volumes:
         - redis_test_billing_volume:/data
       healthcheck:
@@ -45,17 +51,6 @@ services:
         interval: 1s
         timeout: 3s
         retries: 5
-    tests:
-      image: backend-billing-image
-      working_dir: /app/backend/tests/functional
-      env_file:
-        - .env.example
-      entrypoint: >
-        sh -c "pip install -r requirements.txt
-        && pytest src_tests"
-      depends_on:
-        backend:
-          condition: service_healthy
 volumes:
     pg_test_billing_volume:
       name: pg_test_billing_volume
