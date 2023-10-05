@@ -1,5 +1,4 @@
 from datetime import datetime
-from decimal import Decimal
 from enum import Enum
 from uuid import UUID
 
@@ -55,7 +54,7 @@ class PaymentModel(BaseModel):
 class AutopaymentModel(BaseModel):
     amount: AmountModel
     capture: bool
-    payment_method_id: str
+    payment_method_id: UUID
     description: str
 
 
