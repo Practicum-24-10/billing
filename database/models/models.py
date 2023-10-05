@@ -22,6 +22,9 @@ class User(Base):
         "UsersPaymentMethods", back_populates="user"
     )
 
+    def __str__(self) -> str:
+        return str(self.id)
+
 
 class UsersPaymentMethods(Base):
     __tablename__ = "users_payment_method"
@@ -36,6 +39,9 @@ class UsersPaymentMethods(Base):
     )
     order: Mapped[int] = mapped_column(Integer, nullable=False)
 
+    def __str__(self) -> str:
+        return str(self.id)
+
 
 class PaymentMethod(Base):
     __tablename__ = "payment_method"
@@ -47,6 +53,9 @@ class PaymentMethod(Base):
     user_payment_method: Mapped["UsersPaymentMethods"] = relationship(
         "UsersPaymentMethods", back_populates="payment_method"
     )
+
+    def __str__(self) -> str:
+        return str(self.id)
 
 
 class Subscription(Base):
@@ -69,6 +78,9 @@ class Subscription(Base):
         foreign_keys="[UsersSubscriptions.next_subscription_id]",
     )
 
+    def __str__(self) -> str:
+        return self.title
+
 
 class Payment(Base):
     __tablename__ = "payment"
@@ -85,6 +97,9 @@ class Payment(Base):
     users_subscription: Mapped["UsersSubscriptions"] = relationship(
         "UsersSubscriptions", back_populates="payment"
     )
+
+    def __str__(self) -> str:
+        return str(self.id)
 
 
 class UsersSubscriptions(Base):
@@ -121,3 +136,6 @@ class UsersSubscriptions(Base):
     payment: Mapped[list["Payment"]] = relationship(
         "Payment", back_populates="users_subscription"
     )
+
+    def __str__(self) -> str:
+        return str(self.id)

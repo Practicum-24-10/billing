@@ -1,0 +1,242 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-05 04:15+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: models.py:25 models.py:17 models.py:15 models.py:58
+msgid "Subscription"
+msgstr "Подписка"
+
+#: models.py:26 models.py:18 models.py:56 models.py:16 models.py:48
+msgid "Subscriptions"
+msgstr "Подписки"
+
+#: models.py:20 models.py:18
+msgid "Title"
+msgstr "Название"
+
+#: models.py:21 models.py:55 models.py:19 models.py:47
+msgid "Active"
+msgstr "Активный"
+
+#: models.py:22 models.py:20
+msgid "Amount"
+msgstr "Сумма"
+
+#: models.py:23 models.py:21
+msgid "Currency"
+msgstr "Валюта"
+
+#: models.py:24 models.py:22
+msgid "Duration"
+msgstr "Продолжительность"
+
+#: models.py:25 models.py:23
+msgid "Permission"
+msgstr "Права"
+
+#: models.py:26 models.py:24
+msgid "User subscriptions"
+msgstr "Подписки пользователя"
+
+#: models.py:27
+msgid "Next user subscription"
+msgstr "Следующая подписка пользователя"
+
+#: models.py:27 models.py:25
+msgid "Next user subscriptions"
+msgstr "Следующая подписка пользователя"
+
+#: translate.py:4
+msgid "Export"
+msgstr "Экспорт"
+
+#: translate.py:5
+msgid "Actions"
+msgstr "Действия"
+
+#: translate.py:6
+msgid "Column"
+msgstr "Колонка"
+
+#: translate.py:7
+msgid "Value"
+msgstr "Значение"
+
+#: translate.py:8
+msgid "Go Back"
+msgstr "Назад"
+
+#: translate.py:9
+msgid "Delete"
+msgstr "Удалить"
+
+#: translate.py:10
+msgid "Edit"
+msgstr "Редактировать"
+
+#: translate.py:11
+msgid "Showing"
+msgstr "Показаны с"
+
+#: translate.py:12
+msgid "to"
+msgstr "по"
+
+#: translate.py:13
+msgid "of"
+msgstr "из"
+
+#: translate.py:14
+msgid "items"
+msgstr "элементов"
+
+#: translate.py:15
+msgid "prew"
+msgstr "пред"
+
+#: translate.py:16
+msgid "next"
+msgstr "след"
+
+#: translate.py:17
+msgid "Show"
+msgstr "Показать"
+
+#: translate.py:18
+msgid "Page"
+msgstr "Страниц"
+
+#: translate.py:19
+msgid "New"
+msgstr "Создать"
+
+#: translate.py:20
+msgid "Cancel"
+msgstr "Отменить"
+
+#: translate.py:21
+msgid "Save and continue editing"
+msgstr "Сохранить и продолжить редактирование"
+
+#: translate.py:22
+msgid "Save"
+msgstr "Сохранить"
+
+#: translate.py:23
+msgid "Save and add another"
+msgstr "Сохранить и создать еще"
+
+#: translate.py:24
+msgid "Delete selected items"
+msgstr "Удалить выбранные элементы"
+
+#: models.py:54 models.py:46 models.py:85 models.py:108 models.py:131
+msgid "id"
+msgstr ""
+
+#: models.py:57 models.py:49
+msgid "Payment methods"
+msgstr "Методы оплаты"
+
+#: models.py:42 models.py:57 models.py:106
+msgid "User"
+msgstr "Пользователь"
+
+#: models.py:43
+msgid "Users"
+msgstr "Пользователи"
+
+#: models.py:54
+msgid "User Subscriptions"
+msgstr "Подписки пользователя"
+
+#: models.py:55
+msgid "Users Subscriptions"
+msgstr "Подписки пользователей"
+
+#: models.py:59
+msgid "Next subscription"
+msgstr "Следующая подписка"
+
+#: models.py:60 models.py:81
+msgid "Payment"
+msgstr "Платеж"
+
+#: models.py:61 models.py:86
+msgid "Created at"
+msgstr "Создано"
+
+#: models.py:62
+msgid "Start at"
+msgstr "Начинается"
+
+#: models.py:63
+msgid "Expires at"
+msgstr "Истекает"
+
+#: models.py:82
+msgid "Payments"
+msgstr "Платежи"
+
+#: models.py:84
+msgid "User subscription"
+msgstr "Подписка пользователя"
+
+#: models.py:87
+msgid "Kassa payment id"
+msgstr "id платежа кассы"
+
+#: models.py:88
+msgid "Payment status"
+msgstr "Статус платежа"
+
+#: models.py:103 models.py:130
+msgid "User payment method"
+msgstr "Метод оплаты пользователя"
+
+#: models.py:104
+msgid "User payment methods"
+msgstr "Методы оплаты пользователей"
+
+#: models.py:107
+msgid "Payment method"
+msgstr "Метод оплаты"
+
+#: models.py:109
+msgid "Order"
+msgstr "Заказ"
+
+#: models.py:128
+msgid "Payment Methods"
+msgstr "Методы оплаты"
+
+#: models.py:132
+msgid "Kassa payment method id"
+msgstr "id метода оплаты кассы"
+
+#: models.py:133
+msgid "Card type"
+msgstr "Тип карты"
+
+#: models.py:134
+msgid "First numbers"
+msgstr "Первые цифры"
+
+#: models.py:135
+msgid "Last numbers"
+msgstr "Последние цифры"
