@@ -47,6 +47,8 @@ services:
           condition: service_healthy
         postgres:
           condition: service_healthy
+    message-broker:
+      image: rabbitmq:alpine
 volumes:
     pg_billing_volume:
       name: pg_billing_volume

@@ -1,6 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -8,6 +9,16 @@ from pydantic import BaseModel, Field
 class CurrencyEnum(str, Enum):
     RUB = 'RUB'
     USD = 'USD'
+    EUR = 'EUR'
+    CNY = 'CNY'
+    INR = 'INR'
+    KZT = 'KZT'
+    UZS = 'UZS'
+    GEL = 'GEL'
+    ERN = 'ERN'
+    AMD = 'AMD'
+    AZN = 'AZN'
+    TJS = 'TJS'
 
 
 class ConfirmationEnum(str, Enum):
@@ -15,7 +26,7 @@ class ConfirmationEnum(str, Enum):
 
 
 class AmountModel(BaseModel):
-    value: Decimal = Field(decimal_places=2)
+    value: float
     currency: CurrencyEnum = CurrencyEnum.RUB
 
 
@@ -39,3 +50,17 @@ class PaymentModel(BaseModel):
     recipient: RecipientModel
     refundable: bool = False
     test: bool = True
+
+
+class AutopaymentModel(BaseModel):
+    amount: AmountModel
+    capture: bool
+    payment_method_id: str
+    description: str
+
+
+class UserSubscriptionCreateModel(BaseModel):
+    user_id: UUID
+    subscription_id: UUID
+    amount: AmountModel
+    plan: str
