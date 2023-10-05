@@ -10,9 +10,44 @@ User -> BillingAPI: Запрос на офрмление подписки
 
 BillingAPI -> BillingAPI: Проверяет токен юзера
 
-BillingAPI -> ExternalPaymentService: Запрос на создание платежа
+BillingAPI -> TransactionsDB: Проверяем есть ли такая подписка и активна ли она
 
-ExternalPaymentService --> BillingAPI: Получаем ссылку на страницу оплаты
+TransactionsDB --> BillingAPI: Ок
+
+BillingAPI -> TransactionsDB: Запрос на действующую подписку
+
+TransactionsDB --> BillingAPI: Ок
+
+alt Подписка есть
+
+BillingAPI -> TransactionsDB: Устанавливаем следующую подписку
+
+TransactionsDB --> BillingAPI: Ок
+
+BillingAPI -> ExternalPaymentService: Создаем ссылку для оплаты для новой карты с метадата отмена платежа и стоимостью 1 рубль и сохранением способа оплаты
+
+ExternalPaymentService --> BillingAPI: Получаем id_payment
+
+BillingAPI -> TransactionsDB: Сохраняем (UserPaymentMethod,PaymentMethod) с id_payment и статусом panding
+
+TransactionsDB --> BillingAPI: Ок
+
+else Подписки нет
+
+BillingAPI -> TransactionsDB: Создаем подписку
+
+TransactionsDB --> BillingAPI: Ок
+
+BillingAPI -> ExternalPaymentService: Создаем ссылку для оплаты для новой карты с метадата без отмены платежа и стоимостью полписки и сохранением способа оплаты
+
+ExternalPaymentService --> BillingAPI: Получаем id_payment
+
+BillingAPI -> TransactionsDB: Сохраняем (UserPaymentMethod,PaymentMethod) и Payments с id_payment с статусом panding
+
+TransactionsDB --> BillingAPI: Ок
+
+end
+
 
 BillingAPI --> User: Редирект на страницу оплаты
 

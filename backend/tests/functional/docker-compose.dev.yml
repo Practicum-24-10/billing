@@ -3,15 +3,13 @@ version: '3.9'
 services:
     postgres:
       image: postgres:13
-      container_name: billing_postgres
       restart: always
       volumes:
-        - pg_billing_volume:/var/lib/postgresql/data/
-        - ./database/dump:/docker-entrypoint-initdb.d
-      env_file:
-        - .env
+        - pg_test_billing_volume:/var/lib/postgresql/data/
       ports:
         - '5432:5432'
+      env_file:
+        - ../../../.env.test
       environment:
         - POSTGRES_USER=${DB_USER}
         - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -21,40 +19,40 @@ services:
         interval: 10s
         timeout: 5s
         retries: 5
-    redis:
-      image: redis:7.0.11-alpine
-      ports:
-        - '6379:6379'
-      volumes:
-        - redis_billing_volume:/data
-      healthcheck:
-        test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
-        interval: 1s
-        timeout: 3s
-        retries: 5
     backend:
       build:
-        context: .
+        context: ../../../.
         dockerfile: ./backend/Dockerfile
       image: backend-billing-image
       env_file:
-        - ./backend/.env
+        - ../../../backend/.env.test
       healthcheck:
-        test: [ "CMD", "curl", "--fail", "http://localhost:8000/api/openapi" ]
+        test: ["CMD", "curl", "--fail", "http://localhost:8000/api/openapi"]
         interval: 15s
         timeout: 5s
         retries: 5
-      ports:
-        - '8000:8000'
       expose:
         - 8000
+      ports:
+        - '8000:8000'
       depends_on:
         redis:
           condition: service_healthy
         postgres:
           condition: service_healthy
+    redis:
+      image: redis:7.0.11-alpine
+      ports:
+        - '6379:6379'
+      volumes:
+        - redis_test_billing_volume:/data
+      healthcheck:
+        test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
+        interval: 1s
+        timeout: 3s
+        retries: 5
 volumes:
-    pg_billing_volume:
-      name: pg_billing_volume
-    redis_billing_volume:
-      name: redis_billing_volume
+    pg_test_billing_volume:
+      name: pg_test_billing_volume
+    redis_test_billing_volume:
+      name: redis_test_billing_volume
