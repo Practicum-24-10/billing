@@ -19,6 +19,7 @@ services:
         interval: 10s
         timeout: 5s
         retries: 5
+
     redis:
       image: redis:7.0.11-alpine
       volumes:
@@ -28,6 +29,7 @@ services:
         interval: 1s
         timeout: 3s
         retries: 5
+
     backend:
       build:
         context: .
@@ -47,6 +49,25 @@ services:
           condition: service_healthy
         postgres:
           condition: service_healthy
+
+    admin:
+      build:
+        context: ./admin
+      env_file:
+        - ./admin/.env
+      volumes:
+        - ./database:/app/database
+      healthcheck:
+        test: ["CMD", "curl", "--fail", "http://localhost:8000/admin/"]
+        interval: 15s
+        timeout: 5s
+        retries: 5
+      expose:
+        - 8000
+      depends_on:
+        postgres:
+          condition: service_healthy
+
 volumes:
     pg_billing_volume:
       name: pg_billing_volume
