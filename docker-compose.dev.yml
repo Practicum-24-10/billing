@@ -55,6 +55,39 @@ services:
           condition: service_healthy
         postgres:
           condition: service_healthy
+    message_broker:
+      image: rabbitmq:alpine
+      ports:
+        - "5672:5672"
+      healthcheck:
+        test: rabbitmq-diagnostics -q ping
+        interval: 5s
+        timeout: 15s
+        retries: 10
+    payments_worker:
+      build:
+        context: .
+        dockerfile: ./worker/Dockerfile
+      command: payments_worker
+      env_file:
+        - .env
+      depends_on:
+        message_broker:
+          condition: service_healthy
+        postgres:
+          condition: service_healthy
+    user_subscriptions_worker:
+      build:
+        context: .
+        dockerfile: ./worker/Dockerfile
+      command: user_subscriptions_worker
+      env_file:
+        - .env
+      depends_on:
+        message_broker:
+          condition: service_healthy
+        postgres:
+          condition: service_healthy
 
     admin:
       build:
