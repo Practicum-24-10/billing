@@ -11,11 +11,11 @@ COPY requirements.txt requirements.txt
 RUN  pip install --upgrade pip \
      && pip install --no-cache-dir -r requirements.txt
 
+RUN apt-get update -y && apt-get install gettext -y
+
 COPY . ./admin
 
 WORKDIR /app
-
-RUN apt-get update -y && apt-get install gettext -y
 
 RUN msgfmt admin/locales/ru/LC_MESSAGES/base.po -o admin/locales/ru/LC_MESSAGES/base.mo
 
