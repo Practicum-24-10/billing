@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="col-12">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">{{ translate_edit }} {{ model_view.name }}</h3>
+    </div>
+    <div class="card-body border-bottom py-3">
+      <form action="{{ model_view._url_for_edit(request, obj) }}" method="POST" enctype="multipart/form-data">
+        <fieldset class="form-fieldset">
+          {% for field in form %}
+          <div class="mb-3 form-group row">
+            {{ field.label(class_="form-label col-sm-2 col-form-label") }}
+            <div class="col-sm-10">
+              {% if field.errors %}
+              {{ field(class_="form-control is-invalid") }}
+              {% else %}
+              {{ field() }}
+              {% endif %}
+              {% for error in field.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </fieldset>
+        <div class="row">
+          {% if error %}
+          <div class="alert alert-danger" role="alert">{{ error }}</div>
+          {% endif %}
+          <div class="col-md-2">
+            <a href="{{ url_for('admin:list', identity=model_view.identity) }}" class="btn">
+              {{ translate_cancel }}
+            </a>
+          </div>
+          <div class="col-md-6">
+            <div class="btn-group flex-wrap" data-toggle="buttons">
+              <input type="submit" name="save" value="{{ translate_save }}" class="btn">
+              <input type="submit" name="save" value="{{ translate_save_and_continue_editing }}" class="btn">
+              {% if model_view.save_as %}
+              <input type="submit" name="save" value="Save as new" class="btn">
+              {% else %}
+              <input type="submit" name="save" value="{{ translate_save_and_add_another }}" class="btn">
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
