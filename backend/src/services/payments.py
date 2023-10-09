@@ -28,9 +28,10 @@ class PaymentService(MixinModel):
         )
         if not result:
             return False
+        return True
 
     async def add_payment_method(
-        self, jwt: JWTPayload, payment_method: str, idempotence_key: UUID
+            self, jwt: JWTPayload, payment_method: str, idempotence_key: UUID
     ):
         user_id = jwt.user_id
         redirect_uuid = uuid.uuid4()
@@ -43,7 +44,8 @@ class PaymentService(MixinModel):
         )
         details = DetailsPaymentModel(
             description="Привязка карты",
-            metadata={"user_id": str(user_id), "cancel": True},
+            metadata={"user_id": str(user_id), "redirect_uuid": str(redirect_uuid),
+                      "cancel": True},
             idempotence_key=idempotence_key,
         )
         payment_link, payment_id = self._get_payment_link(payment, details)
@@ -65,8 +67,8 @@ class PaymentService(MixinModel):
 
 @lru_cache()
 def get_payment_service(
-    kassa: AbstractKassa = Depends(get_yookassa),
-    storage: AbstractStorage = Depends(get_postgres),
-    cache: AbstractCache = Depends(get_redis),
+        kassa: AbstractKassa = Depends(get_yookassa),
+        storage: AbstractStorage = Depends(get_postgres),
+        cache: AbstractCache = Depends(get_redis),
 ) -> PaymentService:
     return PaymentService(kassa, storage, cache)

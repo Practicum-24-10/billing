@@ -9,6 +9,7 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 
 from backend.src.api.v1.payments_api import router as payment_router
 from backend.src.api.v1.subscriptions_api import router as subscription_router
+from backend.src.api.v1.webhook_api import router as webhook_router
 from backend.src.auth import rsa_key
 from backend.src.auth.abc_key import RsaKey
 from backend.src.core.config import PUBLIC_KEY, config
@@ -58,6 +59,7 @@ app.include_router(
     subscription_router, prefix="/api/v1/subscription", tags=["subscription"]
 )
 app.include_router(payment_router, prefix="/api/v1/payment", tags=["payment"])
+app.include_router(webhook_router, prefix="/api/v1/billing", tags=["webhook"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
